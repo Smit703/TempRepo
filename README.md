@@ -1,115 +1,56 @@
-# TempRepo
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public repo
+public class GitHubFolderDownloader {
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+    // Replace with your repository and folder
+    private static final String REPO_OWNER = "your-username";
+    private static final String REPO_NAME = "your-repository";
+    private static final String FOLDER_PATH = "path-to-folder";
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + FOLDER_PATH;
 
-public class GitHubFileReader {
-    public static void main(String[] args) {
-        String fileURL = "https://raw.githubusercontent.com/user/repo/main/file.txt";  // Replace with your file's raw URL
-        try {
-            // Create a URL object
-            URL url = new URL(fileURL);
-            
-            // Open a connection to the URL
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            
-            // Set the request method to GET
-            connection.setRequestMethod("GET");
-            
-            // Get the response code
-            int responseCode = connection.getResponseCode();
-            
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                // Create a BufferedReader to read the response
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder content = new StringBuilder();
-                
-                // Read the response line by line
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine).append("\n");
-                }
-                
-                // Close the connections
-                in.close();
-                connection.disconnect();
-                
-                // Print or process the content of the file
-                System.out.println("File content:\n" + content.toString());
-            } else {
-                System.out.println("Failed to retrieve the file. Response code: " + responseCode);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-
-
-private repo
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Base64;
-
-public class GitHubPrivateFileReader {
-    public static void main(String[] args) {
-        String apiUrl = "https://api.github.com/repos/username/repo/contents/path/to/file.txt";  // Replace with API URL
-        String personalAccessToken = "your_personal_access_token";  // Replace with your GitHub token
+    public static void main(String[] args) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
         
-        try {
-            // Create a URL object
-            URL url = new URL(apiUrl);
-            
-            // Open a connection to the URL
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            
-            // Set the request method to GET
-            connection.setRequestMethod("GET");
-            
-            // Add Authorization header for GitHub API
-            String encodedAuth = "token " + personalAccessToken;
-            connection.setRequestProperty("Authorization", encodedAuth);
-            
-            // Get the response code
-            int responseCode = connection.getResponseCode();
-            
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                // Create a BufferedReader to read the response
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder content = new StringBuilder();
-                
-                // Read the response line by line
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine).append("\n");
-                }
-                
-                // Close the connections
-                in.close();
-                connection.disconnect();
-                
-                // Print or process the content of the file
-                System.out.println("File content:\n" + content.toString());
-            } else {
-                System.out.println("Failed to retrieve the file. Response code: " + responseCode);
+        // Send GET request to fetch the list of files
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(GITHUB_API_URL))
+                .header("Accept", "application/vnd.github.v3+json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Parse the JSON response
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode filesArray = objectMapper.readTree(response.body());
+
+        if (filesArray.isArray()) {
+            for (JsonNode fileNode : filesArray) {
+                String fileName = fileNode.get("name").asText();
+                String fileUrl = fileNode.get("download_url").asText();
+
+                // Download each file content
+                String fileContent = downloadFileContent(client, fileUrl);
+                System.out.println("File: " + fileName);
+                System.out.println(fileContent);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("No files found in the folder.");
         }
     }
+
+    // Helper method to download the file content from GitHub
+    private static String downloadFileContent(HttpClient client, String fileUrl) throws Exception {
+        HttpRequest fileRequest = HttpRequest.newBuilder()
+                .uri(URI.create(fileUrl))
+                .build();
+
+        HttpResponse<String> fileResponse = client.send(fileRequest, HttpResponse.BodyHandlers.ofString());
+        return fileResponse.body();
+    }
 }
-
-
-import java.util.Base64;
-
-String encodedContent = content.toString();  // Replace with actual encoded response content
-byte[] decodedBytes = Base64.getDecoder().decode(encodedContent);
-String decodedContent = new String(decodedBytes);
-System.out.println("Decoded File Content:\n" + decodedContent);
-
