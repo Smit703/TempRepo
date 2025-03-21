@@ -1,56 +1,90 @@
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+Context aware testing:
 
-public class GitHubFolderDownloader {
+import openai
 
-    // Replace with your repository and folder
-    private static final String REPO_OWNER = "your-username";
-    private static final String REPO_NAME = "your-repository";
-    private static final String FOLDER_PATH = "path-to-folder";
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + FOLDER_PATH;
-
-    public static void main(String[] args) throws Exception {
-        HttpClient client = HttpClient.newHttpClient();
+# Function to generate test cases using GPT
+    def generate_test_cases(context, num_cases=5):
+        prompt = f"""
+        You are an expert in financial transactions and risk assessment. Generate {num_cases} test cases for the following scenario:
+    
+        Scenario: {context}
         
-        // Send GET request to fetch the list of files
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(GITHUB_API_URL))
-                .header("Accept", "application/vnd.github.v3+json")
-                .build();
+        Each test case should include:
+        - Test Case ID
+        - Description
+        - Expected Outcome
+        - Risk Level (Low, Medium, High)
+        - Regulatory Compliance Notes (if applicable)
+        
+        Format the output as a structured JSON list.
+        """
+    
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "system", "content": "You are an AI test case generator."},
+                      {"role": "user", "content": prompt}]
+        )
+    
+        return response["choices"][0]["message"]["content"]
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+# Example usage
+context = "Detect fraudulent credit card transactions based on unusual spending patterns."
+test_cases = generate_test_cases(context)
+print(test_cases)
 
-        // Parse the JSON response
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode filesArray = objectMapper.readTree(response.body());
 
-        if (filesArray.isArray()) {
-            for (JsonNode fileNode : filesArray) {
-                String fileName = fileNode.get("name").asText();
-                String fileUrl = fileNode.get("download_url").asText();
 
-                // Download each file content
-                String fileContent = downloadFileContent(client, fileUrl);
-                System.out.println("File: " + fileName);
-                System.out.println(fileContent);
-            }
-        } else {
-            System.out.println("No files found in the folder.");
-        }
-    }
+Ananoly detection and reconciliation
 
-    // Helper method to download the file content from GitHub
-    private static String downloadFileContent(HttpClient client, String fileUrl) throws Exception {
-        HttpRequest fileRequest = HttpRequest.newBuilder()
-                .uri(URI.create(fileUrl))
-                .build();
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+import openai
 
-        HttpResponse<String> fileResponse = client.send(fileRequest, HttpResponse.BodyHandlers.ofString());
-        return fileResponse.body();
-    }
-}
+    # Load historical and current data
+    historical_data = pd.read_csv("historical_data.csv")  # Replace with actual data file
+    current_data = pd.read_csv("current_data.csv")  # Replace with actual data file
+    
+    # Selecting numerical features for analysis
+    features = historical_data.select_dtypes(include=[np.number])
+    
+    # Train IsolationForest on historical data
+    model = IsolationForest(contamination=0.05, random_state=42)  # Adjust contamination rate
+    model.fit(features)
+    
+    # Predict anomalies in current data
+    current_features = current_data.select_dtypes(include=[np.number])
+    current_data["Anomaly"] = model.predict(current_features)
+    
+    # -1 indicates anomaly, 1 indicates normal data
+    anomalies = current_data[current_data["Anomaly"] == -1]
+    
+    # Function to generate insights using GPT-4
+    def generate_gpt_insight(data_row):
+        prompt = f"""
+        The following data point has been detected as an anomaly:
+
+        {data_row.to_dict()}
+    
+        Please provide a possible reason why this data point might be an anomaly and suggest potential reconciliation steps.
+        """
+    
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+    
+        return response["choices"][0]["message"]["content"]
+    
+    # Generate insights for detected anomalies
+    if not anomalies.empty:
+        anomalies["GPT_Insight"] = anomalies.apply(generate_gpt_insight, axis=1)
+    
+    # Save results
+    current_data.to_csv("anomaly_results_with_gpt.csv", index=False)
+    
+    print("Anomaly detection completed. Check 'anomaly_results_with_gpt.csv' for results.")
+
+
+
+
