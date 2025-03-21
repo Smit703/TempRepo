@@ -36,10 +36,6 @@ print(test_cases)
 
 Ananoly detection and reconciliation
 
-import numpy as np
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-import openai
 
     # Load historical and current data
     historical_data = pd.read_csv("historical_data.csv")  # Replace with actual data file
