@@ -1,8 +1,7 @@
-Context aware testing:
+# Context aware testing:
 
-import openai
 
-# Function to generate test cases using GPT
+    # Function to generate test cases using GPT
     def generate_test_cases(context, num_cases=5):
         prompt = f"""
         You are an expert in financial transactions and risk assessment. Generate {num_cases} test cases for the following scenario:
@@ -27,14 +26,14 @@ import openai
     
         return response["choices"][0]["message"]["content"]
 
-# Example usage
-context = "Detect fraudulent credit card transactions based on unusual spending patterns."
-test_cases = generate_test_cases(context)
-print(test_cases)
+    # Example usage
+    context = "Detect fraudulent credit card transactions based on unusual spending patterns."
+    test_cases = generate_test_cases(context)
+    print(test_cases)
 
 
 
-Ananoly detection and reconciliation
+# Ananoly detection and reconciliation
 
 
     # Load historical and current data
