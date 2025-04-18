@@ -134,6 +134,8 @@ fontbox-2.0.29.jar - https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.
 commons-logging-1.2.jar - https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/
 pdfbox-tools-2.0.29.jar - https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-tools/2.0.29/
 
+java -cp "pdfbox-2.0.29.jar;commons-logging-1.2.jar;fontbox-2.0.29.jar" PDFPrinter.java
+
 
 
 
