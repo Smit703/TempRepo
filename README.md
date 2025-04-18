@@ -81,5 +81,46 @@
     print("Anomaly detection completed. Check 'anomaly_results_with_gpt.csv' for results.")
 
 
+#Print
+
+import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.IOException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.printing.PDFPageable;
+
+public class PDFPrinter {
+
+    public static void main(String[] args) {
+        String pdfPath = "C:/Users/smitb/OneDrive/Desktop/Poster.pdf";
+
+        try (PDDocument document = PDDocument.load(new File(pdfPath))) {
+            PrinterJob job = PrinterJob.getPrinterJob();
+            
+            // Automatically select default printer
+            PrintService defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
+            if (defaultPrintService != null) {
+                job.setPrintService(defaultPrintService);
+            }
+
+            job.setPageable(new PDFPageable(document));
+            
+            // Print without showing a print dialog
+            job.print();
+
+            System.out.println("Printing completed.");
+        } catch (IOException e) {
+            System.err.println("Error loading PDF: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error printing PDF: " + e.getMessage());
+        }
+    }
+}
+
+
+
 
 
