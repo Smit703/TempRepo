@@ -120,6 +120,12 @@ public class PDFPrinter {
     }
 }
 
+dependencies:
+pdfbox-2.0.29.jar
+fontbox-2.0.29.jar
+commons-logging-1.2.jar
+pdfbox-tools-2.0.29.jar
+
 
 
 
