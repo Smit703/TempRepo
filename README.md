@@ -95,10 +95,15 @@ import org.apache.pdfbox.printing.PDFPageable;
 public class PDFPrinter {
 
     public static void main(String[] args) {
+        PrintService[] services = PrinterJob.lookupPrintServices();
+        for (PrintService service : services) {
+            System.out.println("Printer: " + service.getName());
+        }
+
         String pdfPath = "C:/Users/smitb/OneDrive/Desktop/Poster.pdf";
 
         try (PDDocument document = PDDocument.load(new File(pdfPath))) {
-            PrinterJob job = PrinterJob.getPrinterJob();
+            PrinterJob job = PrinterJob.getPrinterJob();    
             
             // Automatically select default printer
             PrintService defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
@@ -107,6 +112,8 @@ public class PDFPrinter {
             }
 
             job.setPageable(new PDFPageable(document));
+
+            //job.setPrintService(service);
             
             // Print without showing a print dialog
             job.print();
@@ -120,11 +127,12 @@ public class PDFPrinter {
     }
 }
 
+
 dependencies:
-pdfbox-2.0.29.jar
-fontbox-2.0.29.jar
-commons-logging-1.2.jar
-pdfbox-tools-2.0.29.jar
+pdfbox-2.0.29.jar - https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.29/
+fontbox-2.0.29.jar - https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.29/
+commons-logging-1.2.jar - https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/
+pdfbox-tools-2.0.29.jar - https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-tools/2.0.29/
 
 
 
